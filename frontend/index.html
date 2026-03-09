@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Audition Analyzer</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<h1>Audition Analyzer 🎭</h1>
 
+<form id="uploadForm">
+<label>Upload Audition Video/Audio:</label><br>
+<input type="file" id="fileInput" accept=".mp4,.mp3,.wav"><br><br>
+
+<label>Select Musical:</label><br>
+<select id="showSelect">
+<option>Wicked</option>
+<option>Hamilton</option>
+<option>Les Misérables</option>
+</select><br><br>
+
+<button type="submit">Analyze My Audition</button>
+</form>
+
+<div id="results"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
