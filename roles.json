@@ -1,0 +1,20 @@
+{
+  "Wicked": {
+    "Elphaba": "Alto",
+    "Glinda": "Soprano",
+    "Nessarose": "Mezzo",
+    "Ensemble": "Any"
+  },
+  "Hamilton": {
+    "Angelica": "Mezzo",
+    "Eliza": "Soprano",
+    "Peggy": "Mezzo",
+    "Ensemble": "Any"
+  },
+  "Les Misérables": {
+    "Fantine": "Mezzo",
+    "Cosette": "Soprano",
+    "Eponine": "Mezzo",
+    "Ensemble": "Any"
+  }
+}
