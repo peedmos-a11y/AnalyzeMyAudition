@@ -9,7 +9,7 @@ def analyze_voice(file_path):
     if avg_pitch > 250:
         return "Soprano"
     elif avg_pitch > 180:
-        return "Mezzo"
+        return "Mezzo
     elif avg_pitch > 120:
         return "Tenor"
     else:
