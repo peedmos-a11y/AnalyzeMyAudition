@@ -4,5 +4,4 @@ python-multipart
 librosa
 numpy
 scipy
-opencv-python
-mediapipe
+
