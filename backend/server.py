@@ -1,13 +1,14 @@
 import os
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import shutil, json
 from voice_analysis import analyze_voice
 from acting_analysis import analyze_acting
 
 app = FastAPI()
 
-# Enable CORS so frontend can access backend from anywhere
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,6 +16,10 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+# Serve frontend files
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")
+
+# Load roles database
 with open("roles.json") as f:
     roles_db = json.load(f)
 
@@ -55,6 +60,7 @@ Best Role Matches: {', '.join(matches)}
         "feedback":feedback
     }
 
+# Deployment-friendly
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
