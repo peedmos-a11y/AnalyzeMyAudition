@@ -11,7 +11,6 @@ from database import conn, cursor
 
 app = FastAPI()
 
-# Allow frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,16 +19,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve frontend
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# Load roles
 with open("roles.json") as f:
     roles_db = json.load(f)
 
-# -------------------------
-# Account system
-# -------------------------
+
+# ------------------
+# ACCOUNT SYSTEM
+# ------------------
 
 @app.post("/signup")
 async def signup(username: str = Form(...), password: str = Form(...)):
@@ -43,6 +41,7 @@ async def signup(username: str = Form(...), password: str = Form(...)):
     except:
         return {"message": "Username already exists"}
 
+
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
     cursor.execute(
@@ -53,32 +52,30 @@ async def login(username: str = Form(...), password: str = Form(...)):
 
     if user:
         return {"success": True}
-    else:
-        return {"success": False}
+    return {"success": False}
 
-# -------------------------
-# Audition Analysis
-# -------------------------
+
+# ------------------
+# AUDITION ANALYSIS
+# ------------------
 
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...), show: str = Form(...)):
 
-    # Save uploaded file
     file_path = file.filename
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # Run analysis
     vocal_type = analyze_voice(file_path)
     acting_feedback = analyze_acting(file_path)
 
-    # Extract username if logged in
     username = "guest"
+
     if "|" in show:
         show, username = show.split("|")
 
-    # Role probabilities
     show_roles = roles_db.get(show, {})
+
     role_probabilities = {}
     matches = []
 
@@ -96,7 +93,6 @@ async def analyze(file: UploadFile = File(...), show: str = Form(...)):
         if prob >= 0.5:
             matches.append(role)
 
-    # Build feedback
     feedback = f"""
 Vocal Type: {vocal_type}
 
@@ -109,11 +105,11 @@ Suggested Roles: {', '.join(matches)}
         top_role = max(role_probabilities, key=role_probabilities.get)
         feedback += f"\nTop Recommended Role: {top_role} ({role_probabilities[top_role]}%)"
 
-    # Save audition to database
     cursor.execute(
         "INSERT INTO auditions(username,show,feedback) VALUES(?,?,?)",
         (username, show, feedback)
     )
+
     conn.commit()
 
     return {
@@ -121,9 +117,10 @@ Suggested Roles: {', '.join(matches)}
         "role_probabilities": role_probabilities
     }
 
-# -------------------------
-# Audition History
-# -------------------------
+
+# ------------------
+# AUDITION HISTORY
+# ------------------
 
 @app.get("/history/{username}")
 async def history(username: str):
@@ -136,6 +133,7 @@ async def history(username: str):
     rows = cursor.fetchall()
 
     history = []
+
     for r in rows:
         history.append({
             "show": r[0],
@@ -144,9 +142,6 @@ async def history(username: str):
 
     return {"history": history}
 
-# -------------------------
-# Run server
-# -------------------------
 
 if __name__ == "__main__":
     import uvicorn
