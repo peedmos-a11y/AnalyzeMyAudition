@@ -4,4 +4,4 @@ python-multipart
 librosa
 numpy
 scipy
-
+sqlite-utils
