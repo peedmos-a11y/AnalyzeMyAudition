@@ -5,18 +5,18 @@ cursor = conn.cursor()
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    password TEXT
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+username TEXT UNIQUE,
+password TEXT
 )
 """)
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS auditions(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT,
-    show TEXT,
-    feedback TEXT
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+username TEXT,
+show TEXT,
+feedback TEXT
 )
 """)
 
