@@ -2,14 +2,13 @@ const form = document.getElementById("uploadForm");
 const resultsDiv = document.getElementById("results");
 let chart;
 
-// Handle file upload
+// File upload
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fileInput = document.getElementById("fileInput").files[0];
     const show = document.getElementById("showSelect").value;
     if (!fileInput) { alert("Please select a file."); return; }
 
-    // Check allowed types
     const allowedTypes = ["audio/wav","audio/mp3","audio/mpeg","video/mp4","video/webm"];
     if(!allowedTypes.includes(fileInput.type)){
         alert("Please upload an audio or video file (.mp3, .wav, .mp4, .webm).");
@@ -73,11 +72,14 @@ function showResults(data) {
 
     const roles = Object.keys(data.role_probabilities || {});
     const probs = Object.values(data.role_probabilities || {});
-
     if(roles.length === 0) return;
 
     const ctx = document.createElement('canvas');
     resultsDiv.appendChild(ctx);
+
+    // Highlight top role in a different color
+    const maxProb = Math.max(...probs);
+    const colors = probs.map(p => p === maxProb ? '#ff5722' : '#4caf50');
 
     chart = new Chart(ctx.getContext('2d'), {
         type: 'bar',
@@ -86,7 +88,7 @@ function showResults(data) {
             datasets: [{
                 label: 'Role Probability (%)',
                 data: probs,
-                backgroundColor: '#ff9800'
+                backgroundColor: colors
             }]
         },
         options: {
