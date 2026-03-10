@@ -1,94 +1,47 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <title>🎭 Audition Analyzer</title>
-
 <link rel="stylesheet" href="style.css">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
-
 <body>
-
 <div class="container">
-
 <h1>🎭 Audition Analyzer</h1>
-
 <p>Upload or record your audition and see what role you might get!</p>
 
-
 <h2>👤 Account</h2>
-
 <div class="account-box">
-
 <input id="username" placeholder="Username">
-
 <input id="password" type="password" placeholder="Password">
-
 <button onclick="signup()">Sign Up</button>
-
 <button onclick="login()">Login</button>
-
 <p id="loginStatus"></p>
-
 </div>
-
 
 <div class="recorder">
-
 <h2>🎥 Record Audition</h2>
-
-<video id="preview" width="300" autoplay muted></video>
-
-<br>
-
+<video id="preview" width="300" autoplay muted></video><br>
 <button id="startRec">Start Recording</button>
-
 <button id="stopRec" disabled>Stop Recording</button>
-
 </div>
 
-
 <div class="upload">
-
 <h2>📁 Upload File</h2>
-
 <form id="uploadForm">
-
-<input type="file" id="fileInput" accept=".mp4,.webm,.mp3,.wav">
-
-<br><br>
-
-<label>Select Musical</label>
-
-<br>
-
+<input type="file" id="fileInput" accept="video/*,audio/*"><br><br>
+<label>Select Musical</label><br>
 <select id="showSelect">
-
 <option>Wicked</option>
-
 <option>Hamilton</option>
-
 <option>Les Misérables</option>
-
-</select>
-
-<br><br>
-
+</select><br><br>
 <button type="submit">Analyze Audition</button>
-
 </form>
-
 </div>
 
 <div id="results"></div>
-
 </div>
-
 <script src="script.js"></script>
-
 </body>
-
 </html>
