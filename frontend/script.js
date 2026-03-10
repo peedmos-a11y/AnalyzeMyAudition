@@ -1,98 +1,242 @@
-const form = document.getElementById("uploadForm");
-const resultsDiv = document.getElementById("results");
-let chart;
+let currentUser = null
 
-// File upload
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const fileInput = document.getElementById("fileInput").files[0];
-    const show = document.getElementById("showSelect").value;
-    if (!fileInput) { alert("Please select a file."); return; }
+const form = document.getElementById("uploadForm")
+const resultsDiv = document.getElementById("results")
 
-    const allowedTypes = ["audio/wav","audio/mp3","audio/mpeg","video/mp4","video/webm"];
-    if(!allowedTypes.includes(fileInput.type)){
-        alert("Please upload an audio or video file (.mp3, .wav, .mp4, .webm).");
-        return;
-    }
+let chart
 
-    const formData = new FormData();
-    formData.append("file", fileInput);
-    formData.append("show", show);
 
-    const response = await fetch("/analyze", { method: "POST", body: formData });
-    const data = await response.json();
-    showResults(data);
-});
+async function signup(){
 
-// Recorder
-let mediaRecorder;
-let recordedChunks = [];
+const username = document.getElementById("username").value
+const password = document.getElementById("password").value
 
-const preview = document.getElementById("preview");
-const startBtn = document.getElementById("startRec");
-const stopBtn = document.getElementById("stopRec");
+const formData = new FormData()
 
-navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-  .then(stream => {
-    preview.srcObject = stream;
-    mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
-  })
-  .catch(err => console.error("Camera access error:", err));
+formData.append("username",username)
+formData.append("password",password)
 
-startBtn.onclick = () => {
-    recordedChunks = [];
-    mediaRecorder.start();
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-};
+const res = await fetch("/signup",{method:"POST",body:formData})
 
-stopBtn.onclick = () => {
-    mediaRecorder.stop();
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    mediaRecorder.onstop = async () => {
-        const blob = new Blob(recordedChunks, { type: "video/webm" });
-        const file = new File([blob], "audition.webm", { type: "video/webm" });
-        const show = document.getElementById("showSelect").value;
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("show", show);
+const data = await res.json()
 
-        const response = await fetch("/analyze", { method: "POST", body: formData });
-        const data = await response.json();
-        showResults(data);
-    };
-};
+document.getElementById("loginStatus").innerText = data.message
 
-// Display feedback + chart
-function showResults(data) {
-    resultsDiv.innerHTML = `<pre>${data.feedback}</pre>`;
-    if(chart) chart.destroy();
+}
 
-    const roles = Object.keys(data.role_probabilities || {});
-    const probs = Object.values(data.role_probabilities || {});
-    if(roles.length === 0) return;
 
-    const ctx = document.createElement('canvas');
-    resultsDiv.appendChild(ctx);
+async function login(){
 
-    // Highlight top role in a different color
-    const maxProb = Math.max(...probs);
-    const colors = probs.map(p => p === maxProb ? '#ff5722' : '#4caf50');
+const username = document.getElementById("username").value
+const password = document.getElementById("password").value
 
-    chart = new Chart(ctx.getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: roles,
-            datasets: [{
-                label: 'Role Probability (%)',
-                data: probs,
-                backgroundColor: colors
-            }]
-        },
-        options: {
-            scales: { y: { beginAtZero: true, max: 100 } }
-        }
-    });
+const formData = new FormData()
+
+formData.append("username",username)
+formData.append("password",password)
+
+const res = await fetch("/login",{method:"POST",body:formData})
+
+const data = await res.json()
+
+if(data.success){
+
+currentUser = username
+
+document.getElementById("loginStatus").innerText = "Logged in!"
+
+loadHistory()
+
+}
+
+else{
+
+document.getElementById("loginStatus").innerText = "Login failed"
+
+}
+
+}
+
+
+
+form.addEventListener("submit",async(e)=>{
+
+e.preventDefault()
+
+const file = document.getElementById("fileInput").files[0]
+
+let show = document.getElementById("showSelect").value
+
+if(currentUser){
+
+show = show + "|" + currentUser
+
+}
+
+const formData = new FormData()
+
+formData.append("file",file)
+
+formData.append("show",show)
+
+const response = await fetch("/analyze",{method:"POST",body:formData})
+
+const data = await response.json()
+
+showResults(data)
+
+})
+
+
+
+async function loadHistory(){
+
+const res = await fetch("/history/"+currentUser)
+
+const data = await res.json()
+
+let html = "<h2>🎭 Your Past Auditions</h2>"
+
+data.history.forEach(h=>{
+
+html += `
+<div class="history-card">
+
+<b>${h.show}</b>
+
+<pre>${h.feedback}</pre>
+
+</div>
+`
+
+})
+
+resultsDiv.innerHTML = html
+
+}
+
+
+
+function showResults(data){
+
+resultsDiv.innerHTML = `<pre>${data.feedback}</pre>`
+
+if(chart) chart.destroy()
+
+const roles = Object.keys(data.role_probabilities || {})
+
+const probs = Object.values(data.role_probabilities || {})
+
+if(roles.length===0) return
+
+const ctx = document.createElement("canvas")
+
+resultsDiv.appendChild(ctx)
+
+chart = new Chart(ctx.getContext("2d"),{
+
+type:"bar",
+
+data:{
+
+labels:roles,
+
+datasets:[{
+
+label:"Role Probability (%)",
+
+data:probs
+
+}]
+
+},
+
+options:{
+
+scales:{y:{beginAtZero:true,max:100}}
+
+}
+
+})
+
+}
+
+
+
+let mediaRecorder
+
+let recordedChunks=[]
+
+const preview=document.getElementById("preview")
+
+const startBtn=document.getElementById("startRec")
+
+const stopBtn=document.getElementById("stopRec")
+
+navigator.mediaDevices.getUserMedia({video:true,audio:true})
+
+.then(stream=>{
+
+preview.srcObject=stream
+
+mediaRecorder=new MediaRecorder(stream)
+
+mediaRecorder.ondataavailable=e=>{
+
+if(e.data.size>0) recordedChunks.push(e.data)
+
+}
+
+})
+
+
+startBtn.onclick=()=>{
+
+recordedChunks=[]
+
+mediaRecorder.start()
+
+startBtn.disabled=true
+
+stopBtn.disabled=false
+
+}
+
+
+stopBtn.onclick=()=>{
+
+mediaRecorder.stop()
+
+startBtn.disabled=false
+
+stopBtn.disabled=true
+
+mediaRecorder.onstop=async()=>{
+
+const blob=new Blob(recordedChunks,{type:"video/webm"})
+
+const file=new File([blob],"audition.webm",{type:"video/webm"})
+
+let show=document.getElementById("showSelect").value
+
+if(currentUser){
+
+show=show+"|"+currentUser
+
+}
+
+const formData=new FormData()
+
+formData.append("file",file)
+
+formData.append("show",show)
+
+const response=await fetch("/analyze",{method:"POST",body:formData})
+
+const data=await response.json()
+
+showResults(data)
+
+}
+
 }
